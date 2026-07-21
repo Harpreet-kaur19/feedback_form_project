@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Response Analysis — {{ form.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="brand">FeedbackAI</a>
+    <div class="nav-links">
+      <a href="{{ url_for('forms_list') }}">My Forms</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="dashboard-header">
+      <div>
+        <h1>Response analysis</h1>
+        <p class="subtitle">{{ form.title }}</p>
+      </div>
+      <div class="actions-row">
+        <a href="{{ url_for('dashboard', form_id=form.form_id) }}" class="btn-secondary">View dashboard</a>
+        <a href="{{ url_for('fill_form', form_id=form.form_id) }}" class="btn-secondary">Open form</a>
+      </div>
+    </div>
+
+    {% if not records %}
+      <p class="subtitle">No responses yet.</p>
+    {% else %}
+      <div class="table-wrap card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Sentiment</th>
+              <th>Score</th>
+              <th>Summary</th>
+              <th>Keywords</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in records %}
+              <tr>
+                <td>{{ r.submitted_at }}</td>
+                <td>
+                  <span class="tag tag-{{ r.sentiment }}">{{ r.sentiment or 'n/a' }}</span>
+                </td>
+                <td>{{ r.score }}</td>
+                <td>{{ r.summary }}</td>
+                <td>
+                  {% for kw in (r.keywords or []) %}<span class="chip">{{ kw }}</span>{% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>

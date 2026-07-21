@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Feedback Form Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="brand">FeedbackAI</a>
+    <div class="nav-links">
+      <a href="{{ url_for('forms_list') }}">My Forms</a>
+    </div>
+  </nav>
+
+  <main class="container narrow">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-list">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h1>Generate a feedback form</h1>
+    <p class="subtitle">
+      Describe what you want feedback on. Gemini will design the questions for you.
+    </p>
+
+    <form action="{{ url_for('generate') }}" method="POST" class="card">
+      <label for="topic">What is this feedback form about?</label>
+      <textarea
+        id="topic"
+        name="topic"
+        rows="3"
+        placeholder="e.g. Feedback on our new mobile app onboarding flow"
+        required
+      ></textarea>
+
+      <label for="num_questions">Number of questions</label>
+      <input
+        type="number"
+        id="num_questions"
+        name="num_questions"
+        min="3"
+        max="10"
+        value="5"
+      />
+
+      <button type="submit" class="btn-primary">Generate form</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard — {{ form.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="brand">FeedbackAI</a>
+    <div class="nav-links">
+      <a href="{{ url_for('forms_list') }}">My Forms</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="dashboard-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="subtitle">{{ form.title }}</p>
+      </div>
+      <div class="actions-row">
+        <a href="{{ url_for('analysis', form_id=form.form_id) }}" class="btn-secondary">View responses</a>
+        <a href="{{ url_for('fill_form', form_id=form.form_id) }}" class="btn-secondary">Open form</a>
+        <form action="{{ url_for('refresh_sentiment', form_id=form.form_id) }}" method="POST">
+          <button type="submit" class="btn-secondary">Re-analyze sentiment</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="stat-cards">
+      <div class="stat-card">
+        <span class="stat-value">{{ summary.total_responses }}</span>
+        <span class="stat-label">Total responses</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ summary.avg_sentiment_score }}</span>
+        <span class="stat-label">Avg. sentiment score (-1 to 1)</span>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h2>Sentiment distribution</h2>
+        <canvas id="sentimentChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h2>Average rating by question</h2>
+        <canvas id="ratingChart"></canvas>
+      </div>
+      <div class="card chart-card chart-card-wide">
+        <h2>Responses over time</h2>
+        <canvas id="timeChart"></canvas>
+      </div>
+      <div class="card chart-card chart-card-wide">
+        <h2>Top keywords</h2>
+        <canvas id="keywordChart"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const sentimentData = {{ summary.sentiment_distribution | tojson }};
+    const ratingData = {{ summary.rating_averages | tojson }};
+    const timeData = {{ summary.responses_over_time | tojson }};
+    const keywordData = {{ summary.top_keywords | tojson }};
+
+    new Chart(document.getElementById('sentimentChart'), {
+      type: 'doughnut',
+      data: {
+        labels: sentimentData.labels,
+        datasets: [{
+          data: sentimentData.counts,
+          backgroundColor: ['#4caf7d', '#c9c9c9', '#e2604f']
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('ratingChart'), {
+      type: 'bar',
+      data: {
+        labels: ratingData.labels,
+        datasets: [{
+          label: 'Average rating (1-5)',
+          data: ratingData.averages,
+          backgroundColor: '#5b7cfa'
+        }]
+      },
+      options: { scales: { y: { min: 0, max: 5 } } }
+    });
+
+    new Chart(document.getElementById('timeChart'), {
+      type: 'line',
+      data: {
+        labels: timeData.labels,
+        datasets: [{
+          label: 'Responses per day',
+          data: timeData.counts,
+          borderColor: '#5b7cfa',
+          tension: 0.3,
+          fill: false
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('keywordChart'), {
+      type: 'bar',
+      data: {
+        labels: keywordData.labels,
+        datasets: [{
+          label: 'Mentions',
+          data: keywordData.counts,
+          backgroundColor: '#f2a65a'
+        }]
+      },
+      options: { indexAxis: 'y' }
+    });
+  </script>
+</body>
+</html>

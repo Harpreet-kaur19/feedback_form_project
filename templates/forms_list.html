@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Forms</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="brand">FeedbackAI</a>
+    <div class="nav-links">
+      <a href="{{ url_for('forms_list') }}">My Forms</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>My forms</h1>
+
+    {% if not forms %}
+      <p class="subtitle">No forms generated yet. <a href="{{ url_for('index') }}">Create one</a>.</p>
+    {% else %}
+      <div class="table-wrap card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Created</th>
+              <th>Share link</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in forms %}
+              <tr>
+                <td>{{ f.title }}</td>
+                <td>{{ f.created_at }}</td>
+                <td><code>{{ url_for('fill_form', form_id=f.form_id, _external=True) }}</code></td>
+                <td>
+                  <a href="{{ url_for('fill_form', form_id=f.form_id) }}">Open</a> ·
+                  <a href="{{ url_for('dashboard', form_id=f.form_id) }}">Dashboard</a> ·
+                  <a href="{{ url_for('analysis', form_id=f.form_id) }}">Responses</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>
